@@ -1,0 +1,17 @@
+{
+  "name": "freshtrack",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*", "backend"],
+  "scripts": {
+    "dev": "concurrently -n web,api -c green,blue \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace backend run dev",
+    "dev:mobile": "npm --workspace apps/mobile run start",
+    "build:web": "npm --workspace apps/web run build",
+    "db:generate": "npm --workspace backend run db:generate",
+    "db:migrate": "npm --workspace backend run db:migrate",
+    "db:seed": "npm --workspace backend run db:seed"
+  },
+  "devDependencies": {"concurrently":"^9.1.2"}
+}

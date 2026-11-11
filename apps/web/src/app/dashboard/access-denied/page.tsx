@@ -1,0 +1,1 @@
+export default function Page(){return <div className='admin-content'><div className='card' style={{padding:40,textAlign:'center'}}><h1 className='admin-title'>Access Denied</h1><p className='muted'>You do not have permission to view this resource.</p></div></div>}

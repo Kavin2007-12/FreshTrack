@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MAIN_ADMIN
+  RESEARCHER
+  VIEWER
+}
+
+enum SampleGroup {
+  CONTROL
+  TREATED
+}
+
+enum RecordStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(RESEARCHER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  experiments Experiment[]
+  observations Observation[]
+}
+
+model Experiment {
+  id                String       @id @default(cuid())
+  code              String       @unique
+  title             String
+  foodType          String
+  objective         String?
+  preservationMethod String?
+  indicatorType     String?
+  status            RecordStatus @default(DRAFT)
+  startDate         DateTime?
+  endDate           DateTime?
+  researcherId      String
+  researcher        User         @relation(fields: [researcherId], references: [id])
+  samples           Sample[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model Sample {
+  id               String       @id @default(cuid())
+  code             String       @unique
+  name             String
+  foodType         String
+  group            SampleGroup
+  preservative     String?
+  concentration    String?
+  indicatorType    String?
+  storageLocation String?
+  publicEnabled    Boolean      @default(false)
+  experimentId     String
+  experiment       Experiment   @relation(fields: [experimentId], references: [id])
+  observations     Observation[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Observation {
+  id              String   @id @default(cuid())
+  observedAt      DateTime @default(now())
+  ph              Float?
+  colour          String?
+  smell           String?
+  texture         String?
+  microbialResult String?
+  notes           String?
+  imageUrl        String?
+  sampleId        String
+  sample          Sample   @relation(fields: [sampleId], references: [id])
+  researcherId    String
+  researcher      User     @relation(fields: [researcherId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+model SensorReading {
+  id          String   @id @default(cuid())
+  deviceId    String
+  temperature Float?
+  humidity    Float?
+  simulated   Boolean  @default(true)
+  recordedAt  DateTime @default(now())
+  sampleId    String?
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  location  String
+  status    String   @default("SIMULATED")
+  lastSeen  DateTime?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+}
